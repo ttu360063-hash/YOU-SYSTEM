@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireTenant } from "@/lib/tenant";
 import { computeModules } from "@/lib/modules";
@@ -24,16 +25,17 @@ export async function POST(req: Request) {
   if (!profile) {
     return NextResponse.json({ message: "Perfil nao encontrado." }, { status: 404 });
   }
+  const layoutJson = candidate.layoutJson as Prisma.InputJsonValue;
 
   await prisma.finalLayout.upsert({
     where: { tenantId },
     update: {
-      layoutJson: candidate.layoutJson,
+      layoutJson,
       layoutHash: candidate.layoutHash,
     },
     create: {
       tenantId,
-      layoutJson: candidate.layoutJson,
+      layoutJson,
       layoutHash: candidate.layoutHash,
     },
   });
