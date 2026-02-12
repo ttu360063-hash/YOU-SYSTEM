@@ -1,5 +1,4 @@
 import { getServerSession } from "next-auth/next";
-import type { NextAuthOptions } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import Email from "next-auth/providers/email";
@@ -7,10 +6,10 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 
-export const authOptions: NextAuthOptions = {
+export const authOptions = {
   adapter: PrismaAdapter(prisma),
   session: {
-    strategy: "jwt",
+    strategy: "jwt" as const,
   },
   providers: [
     Email({
@@ -47,7 +46,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: { token: any; user?: any }) {
       if (user) {
         const dbUser = await prisma.user.findUnique({
           where: { id: user.id },
@@ -57,10 +56,10 @@ export const authOptions: NextAuthOptions = {
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: any; token: any }) {
       if (session.user) {
         session.user.id = token.sub || "";
-        session.user.tenantId = (token as { tenantId?: string | null }).tenantId || null;
+        session.user.tenantId = token.tenantId || null;
       }
       return session;
     },

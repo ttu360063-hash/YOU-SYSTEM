@@ -27,11 +27,11 @@ function mulberry32(seed: number) {
   };
 }
 
-function pick<T>(list: T[], rand: () => number) {
+function pick<T>(list: readonly T[], rand: () => number) {
   return list[Math.floor(rand() * list.length)];
 }
 
-function shuffle<T>(list: T[], rand: () => number) {
+function shuffle<T>(list: readonly T[], rand: () => number) {
   const arr = [...list];
   for (let i = arr.length - 1; i > 0; i -= 1) {
     const j = Math.floor(rand() * (i + 1));
@@ -52,11 +52,15 @@ export function generateLayout(
   const seed = crypto.randomBytes(8).readUInt32LE(0);
   const rand = mulberry32(seed);
 
-  const navigationOptions = prefs.navigation === "topbar"
-    ? ["topbar", "expansive"]
-    : ["sidebar-small", "sidebar-large"];
+  const navigationOptions: readonly LayoutConfig["navigation"][] =
+    prefs.navigation === "topbar"
+      ? ["topbar", "expansive"]
+      : ["sidebar-small", "sidebar-large"];
 
   const cardsOptions = ["grid", "list", "dual", "mosaic"] as const;
+  const density: LayoutConfig["density"] = prefs.density === "advanced" ? "advanced" : "minimal";
+  const cardStyle: LayoutConfig["cardStyle"] = prefs.cardStyle === "square" ? "square" : "round";
+  const theme: LayoutConfig["theme"] = prefs.theme === "escuro" ? "escuro" : "claro";
 
   const widgetsBase = [
     { key: "finance", title: "Resumo financeiro", description: "Entradas, saidas e fluxo de caixa." },
@@ -117,12 +121,12 @@ export function generateLayout(
     const cards = pick(cardsOptions, rand);
     const baseWidgets = shuffle(widgetsBase, rand).slice(0, 2);
     const areaWidgets = widgetsByArea[profile.mainArea] || widgetsByArea["Tudo e importante"];
-    const offerWidgets = offersWidgets[profile.offers];
+    const offerWidgets = offersWidgets[profile.offers] || [];
 
     const widgets = shuffle(
       [...baseWidgets, ...areaWidgets, ...offerWidgets],
       rand
-    ).slice(0, prefs.density === "minimal" ? 6 : 9);
+    ).slice(0, density === "minimal" ? 6 : 9);
 
     const highlights = shuffle(
       [
@@ -137,9 +141,9 @@ export function generateLayout(
     const layoutSeed = {
       navigation,
       cards,
-      density: prefs.density,
-      cardStyle: prefs.cardStyle,
-      theme: prefs.theme,
+      density,
+      cardStyle,
+      theme,
       widgets: widgets.map((w) => w.key),
     };
 
@@ -149,9 +153,9 @@ export function generateLayout(
       layoutHash,
       navigation,
       cards,
-      density: prefs.density,
-      cardStyle: prefs.cardStyle,
-      theme: prefs.theme,
+      density,
+      cardStyle,
+      theme,
       widgets,
       highlights,
     };

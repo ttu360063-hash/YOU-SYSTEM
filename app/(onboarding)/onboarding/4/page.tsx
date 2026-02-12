@@ -1,17 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { LayoutPreview } from "@/components/layout/layout-preview";
 import type { LayoutConfig } from "@/lib/layout-generator";
 
 export default function OnboardingStep4() {
   const router = useRouter();
-  const search = useSearchParams();
-  const candidateId = search.get("candidate");
+  const [candidateId, setCandidateId] = useState<string | null>(null);
   const [layout, setLayout] = useState<LayoutConfig | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setCandidateId(params.get("candidate"));
+  }, []);
 
   useEffect(() => {
     if (!candidateId) return;
