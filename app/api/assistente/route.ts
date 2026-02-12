@@ -7,7 +7,7 @@ export async function POST(req: Request) {
   const body = await req.json();
   const message = (body?.message as string) || "";
 
-  const summary = await prisma.sales.aggregate({
+  const summary = await prisma.sale.aggregate({
     where: { tenantId },
     _sum: { totalAmount: true },
     _count: { id: true },
