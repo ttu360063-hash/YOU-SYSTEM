@@ -1,4 +1,4 @@
-import { getServerSession } from "next-auth";
+import { getServerSession } from "next-auth/next";
 import type { NextAuthOptions } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
