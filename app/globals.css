@@ -1,0 +1,114 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --bg: #ffffff;
+  --fg: #111111;
+  --muted: #f2f2f2;
+  --muted-2: #e6e6e6;
+  --border: #d9d9d9;
+  --accent: #1c1c1c;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  font-family: Manrope, ui-sans-serif, system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+::selection {
+  background: #1c1c1c;
+  color: #f2f2f2;
+}
+
+.surface {
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.noise {
+  position: relative;
+}
+
+.noise::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E");
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+.section-title {
+  font-family: Sora, ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition;
+}
+
+.btn-primary {
+  @apply bg-ink-900 text-mist-50 hover:bg-ink-800;
+}
+
+.btn-secondary {
+  @apply border border-ink-900 text-ink-900 hover:bg-ink-900 hover:text-mist-50;
+}
+
+.input {
+  @apply w-full rounded-xl border border-mist-300 bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ink-800;
+}
+
+.card {
+  @apply rounded-2xl border border-mist-300 bg-white shadow-soft;
+}
+
+@keyframes logo-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.94);
+    filter: blur(6px);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(0) scale(1.01);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+.logo-enter {
+  animation: logo-enter 900ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.logo-enter-pre {
+  opacity: 0;
+  transform: translateY(20px) scale(0.9);
+  filter: blur(8px);
+}
+
+.logo-enter-active {
+  animation: logo-enter 1200ms cubic-bezier(0.16, 0.84, 0.2, 1) both;
+}

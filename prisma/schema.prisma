@@ -1,0 +1,289 @@
+// Prisma schema for You System
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum ModuleKey {
+  vendas
+  produtos
+  servicos
+  financeiro
+  clientes
+  operacoes
+}
+
+model User {
+  id              String      @id @default(cuid())
+  name            String?
+  email           String?     @unique
+  emailVerified   DateTime?
+  image           String?
+  passwordHash    String?
+  defaultTenantId String?
+  accounts        Account[]
+  sessions        Session[]
+  memberships     Membership[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model Tenant {
+  id             String            @id @default(cuid())
+  name           String
+  onboardingStep Int               @default(0)
+  memberships    Membership[]
+  companyProfile CompanyProfile?
+  layoutPrefs    LayoutPreferences?
+  layoutFinal    FinalLayout?
+  layoutCandidates LayoutCandidate[]
+  moduleSettings ModuleSetting[]
+  products       Product[]
+  services       Service[]
+  sales          Sale[]
+  customers      Customer[]
+  financeEntries FinanceEntry[]
+  tasks          Task[]
+  projects       Project[]
+  checklists     Checklist[]
+  workOrders     WorkOrder[]
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+}
+
+model Membership {
+  id        String     @id @default(cuid())
+  userId    String
+  tenantId  String
+  role      MemberRole @default(MEMBER)
+  user      User       @relation(fields: [userId], references: [id])
+  tenant    Tenant     @relation(fields: [tenantId], references: [id])
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@unique([userId, tenantId])
+}
+
+model CompanyProfile {
+  id             String   @id @default(cuid())
+  tenantId       String   @unique
+  companyName    String
+  businessType   String
+  operationMode  String
+  offers         String
+  companySize    String
+  mainArea       String
+  tenant         Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model LayoutPreferences {
+  id         String   @id @default(cuid())
+  tenantId   String   @unique
+  theme      String
+  navigation String
+  cardStyle  String
+  density    String
+  iconStyle  String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model LayoutCandidate {
+  id         String   @id @default(cuid())
+  tenantId   String
+  layoutHash String
+  layoutJson Json
+  tenant     Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt  DateTime @default(now())
+
+  @@index([tenantId])
+}
+
+model FinalLayout {
+  id         String   @id @default(cuid())
+  tenantId   String   @unique
+  layoutHash String
+  layoutJson Json
+  tenant     Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model ModuleSetting {
+  id        String    @id @default(cuid())
+  tenantId  String
+  moduleKey ModuleKey
+  enabled   Boolean   @default(true)
+  tenant    Tenant    @relation(fields: [tenantId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([tenantId, moduleKey])
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  sku         String?
+  price       Float
+  stock       Int      @default(0)
+  category    String?
+  supplier    String?
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenantId])
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  description String?
+  price       Float
+  durationMin Int?
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenantId])
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  tenantId  String
+  name      String
+  email     String?
+  phone     String?
+  notes     String?
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  sales     Sale[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+}
+
+model Sale {
+  id          String   @id @default(cuid())
+  tenantId    String
+  customerId  String?
+  totalAmount Float
+  notes       String?
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  customer    Customer? @relation(fields: [customerId], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@index([tenantId])
+}
+
+model FinanceEntry {
+  id        String   @id @default(cuid())
+  tenantId  String
+  type      String
+  amount    Float
+  description String?
+  dueDate   DateTime?
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
+}
+
+model Task {
+  id        String   @id @default(cuid())
+  tenantId  String
+  title     String
+  status    String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+}
+
+model Project {
+  id        String   @id @default(cuid())
+  tenantId  String
+  name      String
+  status    String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+}
+
+model Checklist {
+  id        String   @id @default(cuid())
+  tenantId  String
+  title     String
+  items     Json
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+}
+
+model WorkOrder {
+  id        String   @id @default(cuid())
+  tenantId  String
+  title     String
+  status    String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
